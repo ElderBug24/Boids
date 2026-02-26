@@ -26,7 +26,7 @@ impl Vehicle {
     }
 
     pub fn draw(&self, cam: Vec2) {
-        self.shape.draw(self.pos - cam, self.vel.to_angle());
+        self.shape.draw(self.pos - cam, self.vel.normalize_or_zero());
     }
 }
 
@@ -35,11 +35,12 @@ pub const BOID_MAX_FORCE: f32 = 0.5;
 pub const BOID_FRICTION: f32 = 0.005;
 pub const BOID_WEIGHT: f32 = 1.0;
 pub const BOID_HEALTH: Range<f32> = 0.0..1.0;
-pub const BOID_HEALTH_DEPLETION_RATE: f32 = 0.005; // 0.001;
-pub const BOID_RADIUS: f32 = 4.0; // 16.0;
+pub const BOID_HEALTH_DEPLETION_RATE: f32 = 0.003;
+pub const BOID_RADIUS: f32 = 16.0;
 pub const BOID_COLOR_A: Color = Color::from_rgba(127, 255, 0, 255);
 pub const BOID_COLOR_B: Color = Color::from_rgba(255, 0, 0, 255);
-pub const BOID_SHAPE: Shape = Shape::Circle { radius: BOID_RADIUS, color: BOID_COLOR_A };
+// pub const BOID_SHAPE: Shape = Shape::Circle { radius: BOID_RADIUS, color: BOID_COLOR_A };
+pub const BOID_SHAPE: Shape = Shape::Triange { size: BOID_RADIUS, color: BOID_COLOR_A };
 
 pub struct Boid {
     pub vehicle: Vehicle,
@@ -54,11 +55,11 @@ impl Boid {
         return Self {
             vehicle: Vehicle {
                 pos: pos,
-                vel: vec2(0.0, -2.0) /*{
+                vel: {
                     let mut rng = ::rand::rng();
                     let vel = vec2(rng.random_range(0.0..1.0), rng.random_range(0.0..1.0));
                     vel.normalize()
-                }*/, // Vec2::ZERO,
+                },
                 acc: Vec2::ZERO,
                 shape: BOID_SHAPE,
                 weight: BOID_WEIGHT
@@ -154,10 +155,12 @@ impl Boid {
             food.swap_remove(index-i);
         }
 
-        if debug {
+        if debug && false {
             let (x, y) = self.vehicle.pos.into();
-            let (ax, ay) = apple_steer.into();
-            draw_line(x, y, x+ax, y+ay, 1.0, Color::from_rgba(255, 255, 255, 255))
+            let (ax, ay) = (apple_steer * 15.0).into();
+            let (px, py) = (poison_steer * 15.0).into();
+            draw_line(x, y, x+ax, y+ay, 1.0, Color::from_rgba(255, 255, 255, 255));
+            draw_line(x, y, x+px, y+py, 1.0, Color::from_rgba(0, 0, 0, 255));
         }
     }
 
@@ -194,24 +197,24 @@ impl Boid {
             let (x, y) = self.vehicle.pos.into();
             let (vx, vy) = (self.vehicle.vel * 10.0).into();
 
-            draw_line(x, y, x+vx, y+vy, 2.0, Color::from_rgba(245, 0, 179, 255));
+            // draw_line(x, y, x+vx, y+vy, 2.0, Color::from_rgba(245, 0, 179, 255));
             draw_circle_lines(x, y, self.dna.apple_perception, 1.0, APPLE_COLOR);
             draw_circle_lines(x, y, self.dna.poison_perception, 1.0, POISON_COLOR);
-            draw_text(&format!("{}", self.health), x - 10.0, y + 20.0, 10.0, Color::from_rgba(245, 0, 179, 255));
+            draw_text(&format!("{:.4}", self.health), x - 13.0, y + 20.0, 10.0, Color::from_rgba(245, 0, 179, 255));
         }
     }
 }
 
-pub const APPLE_WEIGHT_INITIAL: Range<f32> = -2.0..2.0; // 0.2..2.0;
+pub const APPLE_WEIGHT_INITIAL: Range<f32> = 0.2..2.0;
 pub const APPLE_WEIGHT_MUTATION: Range<f32> = -0.1..0.1;
-pub const POISON_WEIGHT_INITIAL: Range<f32> = -2.0..2.0; // -1.5..0.1;
+pub const POISON_WEIGHT_INITIAL: Range<f32> = -1.5..0.1;
 pub const POISON_WEIGHT_MUTATION: Range<f32> = -0.1..0.1;
-pub const APPLE_PERCEPTION_INITIAL: Range<f32> = 0.0..100.0; // 100.0..800.0;
+pub const APPLE_PERCEPTION_INITIAL: Range<f32> = 100.0..800.0;
 pub const APPLE_PERCEPTION_MUTATION: Range<f32> = -10.0..10.0;
-pub const POISON_PERCEPTION_INITIAL: Range<f32> = 0.0..100.0; // 100.0..800.0;
+pub const POISON_PERCEPTION_INITIAL: Range<f32> = 100.0..800.0;
 pub const POISON_PERCEPTION_MUTATION: Range<f32> = -10.0..10.0;
 
-pub const DNA_MUTATION_RATE: f64 = 0.01; // 1.0;
+pub const DNA_MUTATION_RATE: f64 = 0.2;
 
 pub struct Dna {
     pub apple_weight: f32,
@@ -246,7 +249,7 @@ impl Dna {
 
 pub const APPLE_NUTRITION: f32 = 0.2;
 pub const POISON_NUTRITION: f32 = -1.0;
-pub const FOOD_RADIUS: f32 = 5.0; // 8.0;
+pub const FOOD_RADIUS: f32 = 8.0;
 pub const APPLE_COLOR: Color = Color::from_rgba(117, 167, 67, 255);
 pub const POISON_COLOR: Color = Color::from_rgba(207, 87, 60, 255);
 

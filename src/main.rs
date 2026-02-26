@@ -9,8 +9,8 @@ use std::thread::sleep;
 use ::rand::{Rng, RngExt};
 use macroquad::prelude::*;
 
-const WINDOW_WIDTH: i32 = 640; // 1600;
-const WINDOW_HEIGHT: i32 = 360; // 800;
+const WINDOW_WIDTH: i32 = 1600;
+const WINDOW_HEIGHT: i32 = 800;
 const TARGET_FPS: f32 = 60.0;
 
 
@@ -19,13 +19,17 @@ fn window_conf() -> Conf {
         window_title: "App".to_owned(),
         window_width: WINDOW_WIDTH,
         window_height: WINDOW_HEIGHT,
+        platform: miniquad::conf::Platform {
+            swap_interval: Some(0),
+            ..Default::default()
+        },
         ..Default::default()
     };
 }
 
-const BACKGROUND_COLOR: Color = Color::from_rgba(33, 25, 81, 255);
+const BACKGROUND_COLOR: Color = Color::from_rgba(45, 41, 61, 255);
 const TEXT_COLOR: Color = Color::from_rgba(245, 0, 179, 255);
-const DEBUG: bool = true;
+const DEBUG: bool = false;
 
 #[macroquad::main(window_conf)]
 async fn main() {
@@ -62,20 +66,20 @@ async fn main() {
             if boids[i-o].is_dead() {
                 let boid = boids.swap_remove(i-o);
                 o += 1;
-                println!("death...");
+                // println!("death...");
 
                 food.push((Food::Apple, boid.vehicle.pos));
             } else {
                 boids[i-o].boundaries((0.0..WINDOW_WIDTH as f32, 0.0..WINDOW_HEIGHT as f32));
                 boids[i-o].eat(&mut food, DEBUG);
-                // boids[i-o].apply_friction();
+                boids[i-o].apply_friction();
                 boids[i-o].update(1.0);
                 boids[i-o].draw(Vec2::ZERO, DEBUG);
 
                 if rng.random_bool(0.002) {
                     let new = boids[i-o].clone();
                     boids.push(new);
-                    println!("birth!");
+                    // println!("birth!");
                 }
             }
         }
