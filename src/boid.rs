@@ -35,8 +35,8 @@ pub const BOID_MAX_FORCE: f32 = 0.5;
 pub const BOID_FRICTION: f32 = 0.005;
 pub const BOID_WEIGHT: f32 = 1.0;
 pub const BOID_HEALTH: Range<f32> = 0.0..1.0;
-pub const BOID_HEALTH_DEPLETION_RATE: f32 = 0.001;
-pub const BOID_RADIUS: f32 = 16.0;
+pub const BOID_HEALTH_DEPLETION_RATE: f32 = 0.005; // 0.001;
+pub const BOID_RADIUS: f32 = 4.0; // 16.0;
 pub const BOID_COLOR_A: Color = Color::from_rgba(127, 255, 0, 255);
 pub const BOID_COLOR_B: Color = Color::from_rgba(255, 0, 0, 255);
 pub const BOID_SHAPE: Shape = Shape::Circle { radius: BOID_RADIUS, color: BOID_COLOR_A };
@@ -54,7 +54,11 @@ impl Boid {
         return Self {
             vehicle: Vehicle {
                 pos: pos,
-                vel: Vec2::ZERO,
+                vel: vec2(0.0, -2.0) /*{
+                    let mut rng = ::rand::rng();
+                    let vel = vec2(rng.random_range(0.0..1.0), rng.random_range(0.0..1.0));
+                    vel.normalize()
+                }*/, // Vec2::ZERO,
                 acc: Vec2::ZERO,
                 shape: BOID_SHAPE,
                 weight: BOID_WEIGHT
@@ -158,7 +162,7 @@ impl Boid {
     }
 
     pub fn boundaries(&mut self, boundaries: (Range<f32>, Range<f32>)) {
-        let mut desired = /*self.vehicle.vel + */ self.vehicle.shape.boundaries(self.vehicle.pos, boundaries) * self.max_speed;
+        let mut desired = self.vehicle.vel + self.vehicle.shape.boundaries(self.vehicle.pos, boundaries) * self.max_speed;
         desired = desired.normalize_or_zero() * self.max_speed;
         let mut steer = desired - self.vehicle.vel;
         steer = steer.normalize_or_zero() * steer.length().min(self.max_force);
@@ -198,14 +202,16 @@ impl Boid {
     }
 }
 
-pub const APPLE_WEIGHT_INITIAL: Range<f32> = 0.2..2.0;
+pub const APPLE_WEIGHT_INITIAL: Range<f32> = -2.0..2.0; // 0.2..2.0;
 pub const APPLE_WEIGHT_MUTATION: Range<f32> = -0.1..0.1;
-pub const POISON_WEIGHT_INITIAL: Range<f32> = -1.5..0.1;
+pub const POISON_WEIGHT_INITIAL: Range<f32> = -2.0..2.0; // -1.5..0.1;
 pub const POISON_WEIGHT_MUTATION: Range<f32> = -0.1..0.1;
-pub const APPLE_PERCEPTION_INITIAL: Range<f32> = 100.0..800.0;
+pub const APPLE_PERCEPTION_INITIAL: Range<f32> = 0.0..100.0; // 100.0..800.0;
 pub const APPLE_PERCEPTION_MUTATION: Range<f32> = -10.0..10.0;
-pub const POISON_PERCEPTION_INITIAL: Range<f32> = 100.0..800.0;
+pub const POISON_PERCEPTION_INITIAL: Range<f32> = 0.0..100.0; // 100.0..800.0;
 pub const POISON_PERCEPTION_MUTATION: Range<f32> = -10.0..10.0;
+
+pub const DNA_MUTATION_RATE: f64 = 0.01; // 1.0;
 
 pub struct Dna {
     pub apple_weight: f32,
@@ -230,7 +236,7 @@ impl Dna {
         let mut rng = ::rand::rng();
 
         return Self {
-            apple_weight: self.apple_weight + rng.random_range(APPLE_WEIGHT_MUTATION),
+            apple_weight: self.apple_weight + rng.random_range(APPLE_WEIGHT_MUTATION) * rng.random_bool(DNA_MUTATION_RATE) as u8 as f32,
             poison_weight: self.poison_weight + rng.random_range(POISON_WEIGHT_MUTATION),
             apple_perception: self.apple_perception + rng.random_range(APPLE_PERCEPTION_MUTATION),
             poison_perception: self.poison_perception + rng.random_range(POISON_PERCEPTION_MUTATION)
@@ -240,7 +246,7 @@ impl Dna {
 
 pub const APPLE_NUTRITION: f32 = 0.2;
 pub const POISON_NUTRITION: f32 = -1.0;
-pub const FOOD_RADIUS: f32 = 8.0;
+pub const FOOD_RADIUS: f32 = 5.0; // 8.0;
 pub const APPLE_COLOR: Color = Color::from_rgba(117, 167, 67, 255);
 pub const POISON_COLOR: Color = Color::from_rgba(207, 87, 60, 255);
 

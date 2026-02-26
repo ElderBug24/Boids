@@ -28,6 +28,7 @@ impl Shape {
 
         match self {
             Self::Circle { radius, .. } => {
+                let radius = 25.0;
                 if pos.x - radius < w.start {
                     desired += vec2(1.0, 0.0);
                 } else if pos.x + radius > w.end {
