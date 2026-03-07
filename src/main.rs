@@ -18,7 +18,7 @@ const TARGET_FPS: f32 = 60.0;
 
 fn window_conf() -> Conf {
     return Conf {
-        window_title: "App".to_owned(),
+        window_title: "Boids Evolution Simulation".to_owned(),
         window_width: WINDOW_WIDTH,
         window_height: WINDOW_HEIGHT,
         platform: miniquad::conf::Platform {
