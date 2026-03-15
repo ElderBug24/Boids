@@ -31,7 +31,7 @@ fn window_conf() -> Conf {
 
 const BACKGROUND_COLOR: Color = Color::from_rgba(45, 41, 61, 255);
 const TEXT_COLOR: Color = Color::from_rgba(245, 0, 179, 255);
-const DEBUG: bool = false;
+const DEBUG: bool = true;
 
 #[macroquad::main(window_conf)]
 async fn main() {
